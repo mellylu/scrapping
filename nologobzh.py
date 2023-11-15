@@ -1,17 +1,21 @@
 import requests
 from bs4 import BeautifulSoup
 import json
+import unicodedata
 
-# url="https://www.lenormandy.net/agenda/"
 url = "https://www.nologobzh.com/programmation-2023/"
 response = requests.get(url)
 
 if response.status_code == 200:
+    data=[]
+    file = open('nologobzh.json', 'w')
+    file.write(json.dumps(data))
+    file.close()
     with open('nologobzh.json') as mon_fichier:
         data = json.load(mon_fichier)
 
     soup = BeautifulSoup(response.content, "html.parser")
-    logo = soup.find('img').get('src') #image logo
+    logo = soup.find('img').get('src')
     print(logo)
     data.append({"src_logo":logo})
     tab=[]
@@ -22,97 +26,34 @@ if response.status_code == 200:
         p = wrapper.find_all('p')
         deuxieme_paragraphe = p[1]
         date = "pas défini"
+        scene = "pas défini"
+        
         if (deuxieme_paragraphe.text.split(" / ")[0]):
             date=deuxieme_paragraphe.text.split(" / ")[0]
-
-            # Supprimer les espaces au début et à la fin et décoder la chaîne
             date = date.strip().encode('latin-1', 'replace').decode('latin-1')
-            
+        if (deuxieme_paragraphe.text.split(" / ")[1]):
+            scene = deuxieme_paragraphe.text.split(" / ")[1]
+            scene = scene.strip().encode('latin-1', 'replace').decode('latin-1')
+        try:
+            troisieme_partie = deuxieme_paragraphe.text.split(" / ")[2]
+            horaire = deuxieme_paragraphe.text.split(" / ")[2]
+            horaire = horaire.strip().encode('latin-1', 'replace').decode('latin-1')
+        except IndexError:
+            horaire = "pas défini"
 
-            # Afficher le résultat
-            # print(chaine_formatee)
-
-        # print(deuxieme_paragraphe.text.split(" / ")[2])
-        # deuxieme_paragraphe.text.split(" / ")[0]
-        # print(deuxieme_paragraphe.text)
-        # for text in p:
-        #     print(text.text)
-    
-        # print(p.text)
-        # print(deuxieme_paragraphe.text)
-
-
-
-        #bon
-        
-        obj_prog={"nom_artiste":h2.text, "pays":premier_paragraphe.text, "date":date}
+        obj_prog={"nom_artiste":h2.text, "pays":premier_paragraphe.text, "date":date, "scene":scene, "horaire":horaire}
         tab.append(obj_prog)
-        #fin bon
-        
-        # y = json.loads(x)
-    
-    
-
-
-    #bon
-    obj_prog={'programmation':tab}
-    # print(obj_prog)
-    data.append(obj_prog)
-    #fin bon
-
-
-        # tab.append(wrapper.text)
-    # print(tab)
-
-
-    #bon
-    file = open('nologobzh.json', 'w')
-    file.write(json.dumps(data))
-    file.close()
-    #fin bon
-
-
-
-
-
-
-
-
-
-
-
-
-
-    # soup = BeautifulSoup(response.content, "html.parser")
-    # p = soup.find_all('div', class_="gig-date")
-    # # contenu = p.text
-    # # for wrapper in soup.find_all('div', class_="gig-date"):
-    #     # print(wrapper.text)
-    # # print(contenu)
     
    
-    # programmation = soup.find_all('article', class_="idcalendar-eventcard bloc-news bloc-events saison ")
+    obj_prog={'programmation':tab}
+    data.append(obj_prog)
 
-    # programmation = soup.find("a").get('href')
-    # # print(soup.select('div > h2'))
+    def normalize_chars(text):
+        return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
 
-    # for wrapper in programmation:
-    #     print(wrapper.text)
-    
+    normalized_data = json.loads(json.dumps(data, ensure_ascii=False))
 
-    # print(programmation)
+    print(json.dumps(normalized_data, ensure_ascii=False, indent=2))
 
-#     ma_div = soup.find('div', class_=re.compile(r'\bartistes\b'))
-
-# # Récupérer le texte à l'intérieur de la balise div
-#     # contenu = ma_div.text
-#     # programmation1 = soup.find('a', "h2") 
-#     # ma_div = soup.find_all("div", class_="nlbzh-thumb-overlay-txt artistes fadeIn-left")
-    
-#     # print(ma_div)
-#     programmation1 = soup.find('div', class_='nlbzh-thumb-overlay-txt artistes fadeIn-left')#.findAll('h2')
-    # print(programmation1)
-    # print(paragraphs)
-    # for paragraph in paragraphs:
-    #     print("hhhhh")
-    #     print(paragraph.text)
+    with open('nologobzh.json', 'w', encoding='utf-8') as file:
+        json.dump(normalized_data, file, ensure_ascii=False, indent=2)
