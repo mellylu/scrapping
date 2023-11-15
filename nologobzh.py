@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-import unicodedata
 
 url = "https://www.nologobzh.com/programmation-2023/"
 response = requests.get(url)
@@ -16,7 +15,6 @@ if response.status_code == 200:
 
     soup = BeautifulSoup(response.content, "html.parser")
     logo = soup.find('img').get('src')
-    print(logo)
     data.append({"src_logo":logo})
     tab=[]
 
@@ -48,12 +46,7 @@ if response.status_code == 200:
     obj_prog={'programmation':tab}
     data.append(obj_prog)
 
-    def normalize_chars(text):
-        return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
-
     normalized_data = json.loads(json.dumps(data, ensure_ascii=False))
-
-    print(json.dumps(normalized_data, ensure_ascii=False, indent=2))
 
     with open('nologobzh.json', 'w', encoding='utf-8') as file:
         json.dump(normalized_data, file, ensure_ascii=False, indent=2)
