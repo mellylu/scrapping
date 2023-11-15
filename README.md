@@ -10,3 +10,6 @@ nologobzh
 sitevetement
 - Boucle sur plusieurs pages du site
 - Récupère le nom des articles en fonction de leur pagination
+
+le_telegramme
+- récupére les textes du site ainsi que les images associés 
